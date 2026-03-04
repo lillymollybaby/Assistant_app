@@ -141,6 +141,12 @@ struct TransferResponse: Codable {
 }
 
 // MARK: - Recipe Models
+struct FridgeRecipesResponse: Codable {
+    let recipes: [RecipeResponse]
+    let fridge_items_count: Int?
+    let message: String?
+}
+
 struct RecipeResponse: Codable, Identifiable {
     let id: Int
     let name: String
@@ -168,6 +174,9 @@ struct RecipeCreate: Codable {
     let fats: Double
     let carbs: Double
     let cook_time: Int
+    let category: String?
+    let cuisine: String?
+    let image_url: String?
 }
 
 struct MovieResponse: Codable, Identifiable {
@@ -765,15 +774,15 @@ class NetworkManager {
     }
     
     // MARK: - Recipes
-    func getRecipesFromFridge() async throws -> [RecipeResponse] {
+    func getRecipesFromFridge() async throws -> FridgeRecipesResponse {
         return try await request("/recipes/from-fridge")
     }
     
-    func exploreRecipes(cuisine: String? = nil, category: String? = nil, maxTime: Int? = nil) async throws -> [RecipeResponse] {
+    func exploreRecipes(cuisine: String? = nil, category: String? = nil, query: String? = nil) async throws -> FridgeRecipesResponse {
         var path = "/recipes/explore?"
         if let c = cuisine { path += "cuisine=\(c)&" }
         if let cat = category { path += "category=\(cat)&" }
-        if let t = maxTime { path += "max_time=\(t)&" }
+        if let q = query { path += "query=\(q.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? q)&" }
         return try await request(path)
     }
     

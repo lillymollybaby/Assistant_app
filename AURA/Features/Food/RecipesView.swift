@@ -57,7 +57,7 @@ extension RecipeResponse {
     }
 
     var availableCount: Int {
-        ingredients?.filter { $0.in_fridge == true }.count ?? 0
+        ingredients?.filter { $0["in_fridge"]?.boolValue == true }.count ?? 0
     }
 
     var missingCount: Int {
@@ -238,9 +238,9 @@ struct FridgeRecipeCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(recipe.name).font(.headline)
                     HStack(spacing: 12) {
-                        Label("\(recipe.calories ?? 0) ккал", systemImage: "flame.fill")
+                        Label("\(recipe.calories) ккал", systemImage: "flame.fill")
                             .font(.caption).foregroundStyle(.orange)
-                        Label("\(recipe.cook_time ?? 0) мин", systemImage: "clock.fill")
+                        Label("\(recipe.cook_time) мин", systemImage: "clock.fill")
                             .font(.caption).foregroundStyle(.secondary)
                     }
                 }
@@ -266,17 +266,19 @@ struct FridgeRecipeCard: View {
             // Ingredients
             if let ingredients = recipe.ingredients, !ingredients.isEmpty {
                 FlowLayout(spacing: 6) {
-                    ForEach(Array(ingredients.enumerated()), id: \.element.name) { _, ing in
+                    ForEach(Array(ingredients.enumerated()), id: \.offset) { _, ing in
+                        let inFridge = ing["in_fridge"]?.boolValue == true
+                        let name = ing["name"]?.stringValue ?? ""
                         HStack(spacing: 4) {
                             Circle()
-                                .fill(ing.in_fridge == true ? Color.green : Color.gray.opacity(0.3))
+                                .fill(inFridge ? Color.green : Color.gray.opacity(0.3))
                                 .frame(width: 6, height: 6)
-                            Text(ing.name)
+                            Text(name)
                                 .font(.caption2)
-                                .foregroundStyle(ing.in_fridge == true ? .primary : .secondary)
+                                .foregroundStyle(inFridge ? .primary : .secondary)
                         }
                         .padding(.horizontal, 8).padding(.vertical, 4)
-                        .background(ing.in_fridge == true ? Color.green.opacity(0.08) : Color(.systemGray6))
+                        .background(inFridge ? Color.green.opacity(0.08) : Color(.systemGray6))
                         .clipShape(Capsule())
                     }
                 }
@@ -344,22 +346,15 @@ struct FridgeRecipeCard: View {
                 let create = RecipeCreate(
                     name: recipe.name,
                     description: recipe.description,
-                    ingredients: recipe.ingredients?.map { ing in
-                        [
-                            "name": AnyEncodable(ing.name),
-                            "amount": AnyEncodable(ing.amount ?? ""),
-                            "in_fridge": AnyEncodable(ing.in_fridge ?? false)
-                        ]
-                    },
-                    calories: recipe.calories ?? 0,
-                    proteins: recipe.proteins ?? 0,
-                    fats: recipe.fats ?? 0,
-                    carbs: recipe.carbs ?? 0,
-                    cook_time: recipe.cook_time ?? 0,
+                    ingredients: recipe.ingredients,
+                    calories: recipe.calories,
+                    proteins: recipe.proteins,
+                    fats: recipe.fats,
+                    carbs: recipe.carbs,
+                    cook_time: recipe.cook_time,
                     category: recipe.category,
                     cuisine: recipe.cuisine,
-                    image_url: nil,
-                    source: "ai"
+                    image_url: nil
                 )
                 _ = try await NetworkManager.shared.saveRecipe(create)
                 await MainActor.run { isSaving = true }
@@ -370,7 +365,7 @@ struct FridgeRecipeCard: View {
     }
 
     private func cookRecipeAction() {
-        guard let id = recipe.id else { return }
+        let id = recipe.id
         isCooking = true
         Task {
             do {
@@ -499,9 +494,9 @@ struct ExploreRecipeCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(recipe.name).font(.subheadline).fontWeight(.semibold)
                     HStack(spacing: 10) {
-                        Label("\(recipe.calories ?? 0) ккал", systemImage: "flame.fill")
+                        Label("\(recipe.calories) ккал", systemImage: "flame.fill")
                             .font(.caption2).foregroundStyle(.orange)
-                        Label("\(recipe.cook_time ?? 0) мин", systemImage: "clock.fill")
+                        Label("\(recipe.cook_time) мин", systemImage: "clock.fill")
                             .font(.caption2).foregroundStyle(.secondary)
                         if let cuisine = recipe.cuisine {
                             Text(cuisine)
@@ -518,16 +513,19 @@ struct ExploreRecipeCard: View {
             // Ingredients
             if let ingredients = recipe.ingredients, !ingredients.isEmpty {
                 VStack(spacing: 6) {
-                    ForEach(Array(ingredients.enumerated()), id: \.element.name) { _, ing in
+                    ForEach(Array(ingredients.enumerated()), id: \.offset) { _, ing in
+                        let inFridge = ing["in_fridge"]?.boolValue == true
+                        let name = ing["name"]?.stringValue ?? ""
+                        let amount = ing["amount"]?.stringValue ?? ""
                         HStack(spacing: 10) {
-                            Image(systemName: ing.in_fridge == true ? "checkmark.circle.fill" : "circle")
+                            Image(systemName: inFridge ? "checkmark.circle.fill" : "circle")
                                 .font(.caption)
-                                .foregroundStyle(ing.in_fridge == true ? .green : .gray.opacity(0.4))
-                            Text(ing.name)
+                                .foregroundStyle(inFridge ? .green : .gray.opacity(0.4))
+                            Text(name)
                                 .font(.caption)
-                                .foregroundStyle(ing.in_fridge == true ? .primary : .secondary)
+                                .foregroundStyle(inFridge ? .primary : .secondary)
                             Spacer()
-                            Text(ing.amount ?? "")
+                            Text(amount)
                                 .font(.caption2).foregroundStyle(.secondary)
                         }
                     }
@@ -566,7 +564,7 @@ struct ExploreRecipeCard: View {
     }
 
     private func addMissingToShopping() {
-        guard let id = recipe.id else { return }
+        let id = recipe.id
         Task {
             do {
                 _ = try await NetworkManager.shared.addMissingToShopping(recipeId: id)
@@ -627,7 +625,7 @@ struct MyRecipesTab: View {
     }
 
     private func unsaveRecipe(_ recipe: RecipeResponse) {
-        guard let id = recipe.id else { return }
+        let id = recipe.id
         Task {
             do {
                 try await NetworkManager.shared.unsaveRecipe(id: id)
@@ -659,9 +657,9 @@ struct SavedRecipeCard: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(recipe.name).font(.subheadline).fontWeight(.medium)
                 HStack(spacing: 8) {
-                    Label("\(recipe.calories ?? 0) ккал", systemImage: "flame.fill")
+                    Label("\(recipe.calories) ккал", systemImage: "flame.fill")
                         .font(.caption2).foregroundStyle(.orange)
-                    Label("\(recipe.cook_time ?? 0) мин", systemImage: "clock.fill")
+                    Label("\(recipe.cook_time) мин", systemImage: "clock.fill")
                         .font(.caption2).foregroundStyle(.secondary)
                 }
             }
