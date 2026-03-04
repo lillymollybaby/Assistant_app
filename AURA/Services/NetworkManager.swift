@@ -135,6 +135,11 @@ struct ShoppingItemCreate: Codable {
     let from_recipe: String?
 }
 
+struct TransferResponse: Codable {
+    let message: String
+    let transferred: Int
+}
+
 // MARK: - Recipe Models
 struct RecipeResponse: Codable, Identifiable {
     let id: Int
@@ -755,7 +760,7 @@ class NetworkManager {
         return try await request("/shopping/items/checked/clear", method: "DELETE")
     }
     
-    func transferToFridge() async throws -> MessageResponse {
+    func transferToFridge() async throws -> TransferResponse {
         return try await request("/shopping/transfer-to-fridge", method: "POST")
     }
     
