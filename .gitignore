@@ -1,0 +1,49 @@
+# Xcode
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xcworkspace/xcuserdata/
+*.xcworkspace/contents.xcworkspacedata
+xcuserdata/
+DerivedData/
+build/
+.build/
+
+# SwiftPM
+.swiftpm/
+Package.resolved
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# App-specific
+.env
+.env.local
+*.pem
+*.key
+node_modules/
+
+# OS
+.DS_Store
+.AppleDouble
+.LSOverride
+*.zip
+
+# Backend
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+*.egg
+venv/
+.venv/

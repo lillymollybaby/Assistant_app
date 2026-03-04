@@ -67,20 +67,16 @@ enum AnyCodableValue: Codable {
 struct DailySummaryResponse: Codable {
     let date: String?
     let total_calories: Double
-    let total_proteins: Double
-    let total_fats: Double
+    let total_protein: Double
+    let total_fat: Double
     let total_carbs: Double
     let meals: [MealResponse]?
     let ai_advice: String?
-    let calorie_goal: Int?      // реальная цель с сервера (может отсутствовать)
+    let calorie_goal: Int?
     let protein_goal: Int?
     let fat_goal: Int?
     let carbs_goal: Int?
 
-    // Обратная совместимость
-    var total_protein: Double { total_proteins }
-    var total_fat: Double { total_fats }
-    var total_carbs_compat: Double { total_carbs }
     var meals_count: Int { meals?.count ?? 0 }
 }
 

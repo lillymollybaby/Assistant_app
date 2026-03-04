@@ -163,6 +163,13 @@ struct AuthView: View {
             EmailVerificationSheet(email: pendingEmail) {
                 // Verification done — proceed to app
                 showEmailVerification = false
+                NotificationCenter.default.post(name: .didLogin, object: nil)
+            }
+        }
+        .onChange(of: showEmailVerification) { _, newValue in
+            // If user dismissed sheet (swipe down / "Позже"), still proceed
+            if !newValue {
+                NotificationCenter.default.post(name: .didLogin, object: nil)
             }
         }
     }
@@ -182,7 +189,9 @@ struct AuthView: View {
                 // Show email verification after registration
                 if r.user.is_verified == false {
                     pendingEmail = email
+                    isLoading = false
                     showEmailVerification = true
+                    return // Don't post .didLogin yet — wait for verification sheet
                 }
                 NotificationCenter.default.post(name: .didLogin, object: nil)
             }

@@ -163,9 +163,9 @@ struct FoodView: View {
     // MARK: - Macros Card
     private var macrosCard: some View {
         HStack(spacing: 12) {
-            MacroPill(label: "Белки", value: summary?.total_proteins ?? 0, goal: Double(summary?.protein_goal ?? 150), color: .blue, icon: "fish.fill")
+            MacroPill(label: "Белки", value: summary?.total_protein ?? 0, goal: Double(summary?.protein_goal ?? 150), color: .blue, icon: "fish.fill")
             MacroPill(label: "Углеводы", value: summary?.total_carbs ?? 0, goal: Double(summary?.carbs_goal ?? 250), color: .orange, icon: "leaf.fill")
-            MacroPill(label: "Жиры", value: summary?.total_fats ?? 0, goal: Double(summary?.fat_goal ?? 70), color: .purple, icon: "drop.fill")
+            MacroPill(label: "Жиры", value: summary?.total_fat ?? 0, goal: Double(summary?.fat_goal ?? 70), color: .purple, icon: "drop.fill")
         }
         .padding(.horizontal)
     }
